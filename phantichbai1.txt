@@ -1,0 +1,114 @@
+Câu 1. Tại sao dòng print(f"Chiến binh {w1.name} xuất trận!") lại báo AttributeError?
+
+Nguyên nhân là trong lớp Warrior, hàm __init__() không gọi hàm khởi tạo của lớp cha (Character).
+
+Code hiện tại:
+
+class Warrior(Character):
+    def __init__(self, name, hp, attack_power, bonus_armor):
+        # Lỗi
+        self.bonus_armor = bonus_armor
+
+Trong khi đó, các thuộc tính:
+
+name
+hp
+attack_power
+
+được tạo bên trong:
+
+class Character:
+    def __init__(self, name, hp, attack_power):
+        self.name = name
+        self.hp = hp
+        self.attack_power = attack_power
+
+Do Warrior.__init__() không gọi Character.__init__(), nên ba thuộc tính trên không hề được tạo.
+
+Khi chương trình thực hiện:
+
+print(w1.name)
+
+Python tìm thuộc tính name trong đối tượng w1 nhưng không tồn tại nên sinh ra:
+
+AttributeError: 'Warrior' object has no attribute 'name'
+
+Cú pháp còn thiếu là:
+
+super().__init__(name, hp, attack_power)
+Câu 2. Nếu không dùng super().__init__() thì có thể gọi hàm khởi tạo của lớp cha bằng cách nào?
+
+Có thể gọi trực tiếp tên lớp cha:
+
+Character.__init__(self, name, hp, attack_power)
+
+Ví dụ:
+
+class Warrior(Character):
+    def __init__(self, name, hp, attack_power, bonus_armor):
+        Character.__init__(self, name, hp, attack_power)
+        self.bonus_armor = bonus_armor
+
+Tuy nhiên cách này không được khuyến khích vì:
+
+Không tận dụng cơ chế MRO (Method Resolution Order).
+Khó bảo trì khi kế thừa nhiều lớp.
+super() linh hoạt và là chuẩn trong Python.
+Câu 3. Sau khi sửa lỗi 1, chương trình sẽ báo lỗi gì ở dòng if w1 > w2:?
+
+Lỗi sẽ là:
+
+TypeError
+
+Ví dụ:
+
+TypeError: '>' not supported between instances of 'Warrior' and 'Warrior'
+Nguyên nhân
+
+Toán tử > chỉ hoạt động khi Python biết quy tắc so sánh giữa hai đối tượng.
+
+Đối với kiểu dữ liệu có sẵn như:
+
+int
+float
+str
+
+Python đã định nghĩa sẵn.
+
+Nhưng Warrior là lớp do lập trình viên tự tạo nên Python không biết tiêu chí để xác định chiến binh nào mạnh hơn.
+
+Do đó:
+
+w1 > w2
+
+không thể thực hiện nếu chưa định nghĩa phương thức tương ứng.
+
+Câu 4. Cần khai báo Magic Method nào?
+
+Cần khai báo:
+
+__gt__()
+
+Đây là Dunder Method dùng để nạp chồng toán tử Greater Than (>).
+
+Hàm nhận 2 tham số:
+
+def __gt__(self, other):
+
+Trong đó:
+
+self: đối tượng bên trái dấu >
+other: đối tượng bên phải dấu >
+
+Ví dụ:
+
+def __gt__(self, other):
+    return self.get_total_power() > other.get_total_power()
+
+Khi đó:
+
+w1 > w2
+
+Python sẽ tự động gọi:
+
+w1.__gt__(w2)
